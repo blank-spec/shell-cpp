@@ -1,10 +1,13 @@
+#include <filesystem>
 #include <memory>
 #include <iostream>
 #include <string>
 #include <print>
+#include <sstream>
 #include <unordered_map>
 #include <vector>
 
+namespace fs = std::filesystem;
 
 class ICommand {
 public:
@@ -27,13 +30,33 @@ public:
         m_commands(commands) {}
 
     void execute(const std::vector<std::string> &args) override {
-        if (m_commands.contains(args[0])) {
-            std::println("{} is a shell builtin", args[0]);
+        const std::string& command_to_find = args[0];
+        if (m_commands.contains(command_to_find)) {
+            std::println("{} is a shell builtin", command_to_find);
+            return;
         }
-        else {
-            std::println("{} not found", args[0]);
+
+        const char* path_env = std::getenv("PATH");
+        if (path_env) {
+            const std::string path_str{path_env};
+            std::stringstream ss{path_str};
+            std::string directory;
+            char delimiter = ':';
+#ifdef _WIN32
+            delimiter = ';';
+#endif
+            while (std::getline(ss, directory, delimiter)) {
+                const fs::path full_path = fs::path(directory) / command_to_find;
+
+                if (fs::exists(full_path)) {
+                    std::println("{} is {}", command_to_find, full_path.string());
+                    return;
+                }
+            }
         }
-    };
+
+        std::println("{}: not found", command_to_find);
+    }
 
 private:
     const std::unordered_map<std::string, std::unique_ptr<ICommand>>& m_commands;
