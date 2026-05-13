@@ -52,7 +52,7 @@ public:
 
                 const fs::path full_path = fs::path(directory) / command_to_find;
 
-                if (fs::exists(full_path) && fs::is_regular_file(full_path)) {
+                if (fs::exists(full_path) && fs::is_regular_file(full_path) && has_execute_permission(full_path)) {
                     std::println("{} is {}", command_to_find, full_path.string());
                     return;
                 }
@@ -60,6 +60,21 @@ public:
         }
 
         std::println("{}: not found", command_to_find);
+    }
+
+private:
+    bool has_execute_permission(const fs::path& p) const {
+        try {
+            const auto status = fs::status(p);
+            const auto perms = status.permissions();
+
+            return (perms & fs::perms::owner_exec) != fs::perms::none ||
+                   (perms & fs::perms::group_exec) != fs::perms::none ||
+                   (perms & fs::perms::others_exec) != fs::perms::none;
+        }
+        catch (...) {
+            return false;
+        }
     }
 
 private:
