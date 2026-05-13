@@ -49,7 +49,7 @@ public:
                 if (directory.empty()) {
                     continue;
                 }
-                
+
                 const fs::path full_path = fs::path(directory) / command_to_find;
 
                 if (fs::exists(full_path)) {
