@@ -21,6 +21,25 @@ public:
 };
 
 
+class TypeCommand : public ICommand {
+public:
+    explicit TypeCommand(const std::unordered_map<std::string, std::unique_ptr<ICommand>>& commands) :
+        m_commands(commands) {}
+
+    void execute(const std::vector<std::string> &args) override {
+        if (m_commands.contains(args[0])) {
+            std::println("{} is a shell builtin", args[0]);
+        }
+        else {
+            std::println("{} not found", args[0]);
+        }
+    };
+
+private:
+    const std::unordered_map<std::string, std::unique_ptr<ICommand>>& m_commands;
+};
+
+
 class EchoCommand : public ICommand {
 public:
     void execute(const std::vector<std::string> &args) override {
@@ -38,6 +57,7 @@ public:
     Shell() {
         m_commands["exit"] = std::make_unique<ExitCommand>();
         m_commands["echo"] = std::make_unique<EchoCommand>();
+        m_commands["type"] = std::make_unique<TypeCommand>(m_commands);
     }
 
     void Run() {
