@@ -46,6 +46,10 @@ public:
             delimiter = ';';
 #endif
             while (std::getline(ss, directory, delimiter)) {
+                if (directory.empty()) {
+                    continue;
+                }
+                
                 const fs::path full_path = fs::path(directory) / command_to_find;
 
                 if (fs::exists(full_path)) {
