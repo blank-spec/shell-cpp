@@ -1,9 +1,14 @@
 #include <iostream>
 #include <string>
+#include <print>
 
 int main() {
-  std::cout << std::unitbuf;
-  std::cerr << std::unitbuf;
+    std::print("$ ");
 
-  std::cout << "$ ";
+    std::string input;
+    if (std::getline(std::cin, input)) {
+        std::println("{}: command not found", input);
+    }
+
+    return 0;
 }
