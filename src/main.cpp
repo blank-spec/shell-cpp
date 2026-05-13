@@ -1,16 +1,86 @@
+#include <functional>
 #include <iostream>
 #include <string>
 #include <print>
+#include <unordered_map>
 
-int main() {
-    while (true) {
-        std::print("$ ");
 
-        std::string input;
-        if (std::getline(std::cin, input)) {
-            std::println("{}: command not found", input);
+class ICommand {
+public:
+    virtual void execute(const std::vector<std::string>& args) = 0;
+    virtual ~ICommand() = default;
+};
+
+
+class ExitCommand : public ICommand {
+public:
+    void execute(const std::vector<std::string> &args) override {
+        exit(0);
+    }
+};
+
+
+class Shell {
+public:
+    Shell() {
+        m_commands["exit"] = std::make_unique<ExitCommand>();
+    }
+
+    void Run() {
+        while (true) {
+            std::print("$ ");
+
+            std::string line;
+            if (!std::getline(std::cin, line) || line.empty()) {
+                continue;
+            }
+
+            auto tokens = ParseInput(line);
+            const std::string command_token = tokens[0];
+
+            std::vector<std::string> args{tokens.begin() + 1, tokens.end()};
+
+            if (m_commands.contains(command_token)) {
+                m_commands[command_token]->execute(args);
+            }
+            else {
+                std::println("{}: command not found", command_token);
+            }
         }
     }
+
+private:
+    std::vector<std::string> ParseInput(std::string_view line) const {
+        std::vector<std::string> result;
+        size_t start = 0;
+        size_t pos = 0;
+
+        while (pos < line.length()) {
+            while (pos < line.length() && std::isspace(static_cast<unsigned char>(line[pos]))) {
+                pos++;
+            }
+
+            start = pos;
+
+            while (pos < line.length() && !std::isspace(static_cast<unsigned char>(line[pos]))) {
+                pos++;
+            }
+
+            if (start < pos) {
+                result.emplace_back(line.substr(start, pos - start));
+            }
+        }
+
+        return result;
+    }
+
+private:
+    std::unordered_map<std::string, std::unique_ptr<ICommand>> m_commands;
+};
+
+int main() {
+    Shell shell;
+    shell.Run();
 
     return 0;
 }
