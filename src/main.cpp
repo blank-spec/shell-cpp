@@ -21,10 +21,23 @@ public:
 };
 
 
+class EchoCommand : public ICommand {
+public:
+    void execute(const std::vector<std::string> &args) override {
+        for (const auto& arg : args) {
+            std::print("{} ", arg);
+        }
+
+        std::println();
+    }
+};
+
+
 class Shell {
 public:
     Shell() {
         m_commands["exit"] = std::make_unique<ExitCommand>();
+        m_commands["echo"] = std::make_unique<EchoCommand>();
     }
 
     void Run() {
