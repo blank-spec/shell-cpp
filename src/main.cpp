@@ -155,7 +155,6 @@ private:
 };
 
 int main() {
-    std::println("DEBUG PATH: {}", std::getenv("PATH") ? std::getenv("PATH") : "nullptr");
     Shell shell;
     shell.Run();
 
