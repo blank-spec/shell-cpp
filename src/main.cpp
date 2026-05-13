@@ -11,14 +11,14 @@ namespace fs = std::filesystem;
 
 class ICommand {
 public:
-    virtual void execute(const std::vector<std::string>& args) = 0;
+    virtual void Execute(const std::vector<std::string>& args) = 0;
     virtual ~ICommand() = default;
 };
 
 
 class ExitCommand : public ICommand {
 public:
-    void execute(const std::vector<std::string> &args) override {
+    void Execute(const std::vector<std::string> &args) override {
         exit(0);
     }
 };
@@ -29,7 +29,7 @@ public:
     explicit TypeCommand(const std::unordered_map<std::string, std::unique_ptr<ICommand>>& commands) :
         m_commands(commands) {}
 
-    void execute(const std::vector<std::string> &args) override {
+    void Execute(const std::vector<std::string> &args) override {
         const std::string& command_to_find = args[0];
         if (m_commands.contains(command_to_find)) {
             std::println("{} is a shell builtin", command_to_find);
@@ -52,7 +52,7 @@ public:
 
                 const fs::path full_path = fs::path(directory) / command_to_find;
 
-                if (fs::exists(full_path) && fs::is_regular_file(full_path) && has_execute_permission(full_path)) {
+                if (fs::exists(full_path) && fs::is_regular_file(full_path) && HasExecutePermission(full_path)) {
                     std::println("{} is {}", command_to_find, full_path.string());
                     return;
                 }
@@ -63,7 +63,7 @@ public:
     }
 
 private:
-    bool has_execute_permission(const fs::path& p) const {
+    bool HasExecutePermission(const fs::path& p) const {
         try {
             const auto status = fs::status(p);
             const auto perms = status.permissions();
@@ -84,7 +84,7 @@ private:
 
 class EchoCommand : public ICommand {
 public:
-    void execute(const std::vector<std::string> &args) override {
+    void Execute(const std::vector<std::string> &args) override {
         for (const auto& arg : args) {
             std::print("{} ", arg);
         }
@@ -117,7 +117,7 @@ public:
             std::vector<std::string> args{tokens.begin() + 1, tokens.end()};
 
             if (m_commands.contains(command_token)) {
-                m_commands[command_token]->execute(args);
+                m_commands[command_token]->Execute(args);
             }
             else {
                 std::println("{}: command not found", command_token);
