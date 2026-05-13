@@ -3,11 +3,13 @@
 #include <print>
 
 int main() {
-    std::print("$ ");
+    while (true) {
+        std::print("$ ");
 
-    std::string input;
-    if (std::getline(std::cin, input)) {
-        std::println("{}: command not found", input);
+        std::string input;
+        if (std::getline(std::cin, input)) {
+            std::println("{}: command not found", input);
+        }
     }
 
     return 0;
