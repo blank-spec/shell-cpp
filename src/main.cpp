@@ -52,7 +52,7 @@ public:
 
                 const fs::path full_path = fs::path(directory) / command_to_find;
 
-                if (fs::exists(full_path)) {
+                if (fs::exists(full_path) && fs::is_regular_file(full_path)) {
                     std::println("{} is {}", command_to_find, full_path.string());
                     return;
                 }
