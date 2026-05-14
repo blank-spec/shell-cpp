@@ -1,6 +1,7 @@
 #include <print>
 
 #include "file_utills.hpp"
+#include <vector>
 
 namespace utils {
     bool IsExecutable(const std::filesystem::path& path) {
