@@ -24,7 +24,7 @@ static const std::unordered_map<std::string_view, RedirectType> kRedirectionType
     {">>", RedirectType::STDOUT_APPEND},
     {"1>>", RedirectType::STDOUT_APPEND},
     {"2>", RedirectType::STDERR},
-    {"2>>", RedirectType::STDOUT_APPEND},
+    {"2>>", RedirectType::STDERR_APPEND},
 };
 
 
