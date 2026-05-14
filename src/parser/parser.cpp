@@ -20,6 +20,7 @@ std::string ErrorToString(ParseError err) {
 
 static const std::unordered_map<std::string_view, RedirectType> kRedirectionTypes = {
     {">",  RedirectType::STDOUT_REWRITE},
+    {"1>",  RedirectType::STDOUT_REWRITE},
     {">>", RedirectType::STDOUT_APPEND},
 };
 
