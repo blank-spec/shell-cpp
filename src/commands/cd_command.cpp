@@ -28,7 +28,7 @@ void CdCommand::Execute(const std::vector<std::string> &args) {
     std::filesystem::current_path(path, ec);
 
     if (ec) {
-        std::println("cd: {}: No such file or directory", path);
+        std::println(stderr, "cd: {}: No such file or directory", path);
     }
 }
 
