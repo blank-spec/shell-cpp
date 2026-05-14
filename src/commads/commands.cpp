@@ -137,10 +137,5 @@ void RunCommand::RunPosix(const std::string& path, const std::vector<std::string
 
 
 void PwdCommand::Execute(const std::vector<std::string> &args) {
-    constexpr size_t size = 1024;
-    char buffer[size];
-
-    if (_getcwd(buffer, size) != nullptr) {
-        std::println("{}", buffer);
-    }
+    std::println("{}", std::filesystem::current_path().string());
 }
