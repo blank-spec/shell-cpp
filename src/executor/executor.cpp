@@ -43,8 +43,6 @@ bool Redirector::Apply(const Redirections& redirects) {
 }
 
 
-#include <fcntl.h> // Убедитесь, что этот заголовок подключен
-
 bool Redirector::SetupStdout(const std::string& path, bool append) {
     int flags = O_WRONLY | O_CREAT;
 
@@ -83,7 +81,7 @@ void CommandExecutor::Execute(const std::vector<Redirection> &redirects,
         return;
     }
     if (pid == 0) {
-        if (!Redirector::apply(redirects)) {
+        if (!Redirector::Apply(redirects)) {
             exit(1);
         }
         command(args);
