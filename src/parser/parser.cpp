@@ -23,7 +23,8 @@ static const std::unordered_map<std::string_view, RedirectType> kRedirectionType
     {"1>",  RedirectType::STDOUT_REWRITE},
     {">>", RedirectType::STDOUT_APPEND},
     {"1>>", RedirectType::STDOUT_APPEND},
-    {"2>", RedirectType::STDERR}
+    {"2>", RedirectType::STDERR},
+    {"2>>", RedirectType::STDOUT_APPEND},
 };
 
 
@@ -41,14 +42,14 @@ std::expected<ParseResult, ParseError> ShellParser::Parse(std::string_view comma
 
         std::optional<std::pair<std::string_view, RedirectType>> found_redirect;
 
-        for (size_t len : {3, 2, 1}) {
-            if (i + len <= command.length()) {
-                std::string_view part = command.substr(i, len);
-                if (kRedirectionTypes.contains(part)) {
-                    found_redirect = {part, kRedirectionTypes.at(part)};
-                    break;
-                }
-            }
+        auto lens = {3, 2, 1};
+        auto it = std::ranges::find_if(lens, [&](size_t len) {
+            return i + len <= command.length() && kRedirectionTypes.contains(command.substr(i, len));
+        });
+
+        if (it != lens.end()) {
+            std::string_view part = command.substr(i, *it);
+            found_redirect = {part, kRedirectionTypes.at(part)};
         }
 
         if (found_redirect) {

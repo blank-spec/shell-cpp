@@ -15,6 +15,7 @@ enum class RedirectType {
     STDOUT_REWRITE,
     STDOUT_APPEND,
     STDERR,
+    STDERR_APPEND,
 };
 
 

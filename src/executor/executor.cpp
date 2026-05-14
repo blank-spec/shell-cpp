@@ -41,7 +41,12 @@ bool Redirector::Apply(const Redirections& redirects) {
                 }
                 break;
             case RedirectType::STDERR:
-                if (!SetupStderr(redir.filename)) {
+                if (!SetupStderr(redir.filename, false)) {
+                    return false;
+                }
+                break;
+            case RedirectType::STDERR_APPEND:
+                if (!SetupStderr(redir.filename, true)) {
                     return false;
                 }
                 break;
@@ -81,11 +86,18 @@ bool Redirector::SetupStdout(const std::string& path, bool append) {
 }
 
 
-bool Redirector::SetupStderr(const std::string& path) {
+bool Redirector::SetupStderr(const std::string& path, bool append) {
+    int flags = O_WRONLY | O_CREAT;
+    if (append) {
+        flags |= O_APPEND;
+    } else {
+        flags |= O_TRUNC;
+    }
+
 #ifdef _WIN32
-    int fd = OPEN(path.c_str(), _O_WRONLY | _O_CREAT | _O_TRUNC, _S_IWRITE);
+    int fd = OPEN(path.c_str(), flags, _S_IWRITE);
 #else
-    int fd = OPEN(path.c_str(), O_WRONLY | O_CREAT | O_TRUNC, 0644);
+    int fd = OPEN(path.c_str(), flags, 0644);
 #endif
 
     if (fd == -1) {
@@ -99,7 +111,8 @@ bool Redirector::SetupStderr(const std::string& path) {
 
     CLOSE(fd);
 
-    if (!std::freopen(path.c_str(), "w", stderr)) {
+    const char* mode = append ? "a" : "w";
+    if (!std::freopen(path.c_str(), mode, stderr)) {
         return false;
     }
 
