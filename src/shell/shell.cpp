@@ -20,25 +20,36 @@ Shell::Shell() {
 std::vector<std::string> Shell::ParseInput(std::string_view line) const {
     std::vector<std::string> result;
     std::string current_arg;
-    char quotes_char = '\0';
-    bool in_quotes = false;
+
+    bool in_double_quotes = false;
+    bool in_single_quotes = false;
+    bool escaped = false;
 
     for (size_t i = 0; i < line.length(); ++i) {
         char c = line[i];
 
-        if ((c == '\'' || c == '"') && (!in_quotes || c == quotes_char)) {
-            if (!in_quotes) {
-                in_quotes = true;
-                quotes_char = c;
-            }
-            else {
-                in_quotes = false;
-                quotes_char = '\0';
-            }
+        if (escaped) {
+            current_arg += c;
+            escaped = false;
             continue;
         }
 
-        if (std::isspace(static_cast<unsigned char>(c)) && !in_quotes) {
+        if (c == '\\' && !in_single_quotes) {
+            escaped = true;
+            continue;
+        }
+
+        if (c == '"' && !in_single_quotes) {
+            in_double_quotes = !in_double_quotes;
+            continue;
+        }
+
+        if (c == '\'' && !in_double_quotes) {
+            in_single_quotes = !in_single_quotes;
+            continue;
+        }
+
+        if (std::isspace(static_cast<unsigned char>(c)) && !in_double_quotes && !in_single_quotes) {
             if (!current_arg.empty()) {
                 result.push_back(current_arg);
                 current_arg.clear();
