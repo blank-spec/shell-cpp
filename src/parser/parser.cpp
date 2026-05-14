@@ -41,7 +41,7 @@ std::expected<ParseResult, ParseError> ShellParser::Parse(std::string_view comma
 
         std::optional<std::pair<std::string_view, RedirectType>> found_redirect;
 
-        for (size_t len : {2, 1, 3}) {
+        for (size_t len : {3, 2, 1}) {
             if (i + len <= command.length()) {
                 std::string_view part = command.substr(i, len);
                 if (kRedirectionTypes.contains(part)) {
