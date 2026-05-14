@@ -48,3 +48,8 @@ public:
 #endif
 };
 
+
+class PwdCommand : public ICommand {
+public:
+    void Execute(const std::vector<std::string> &args) override;
+};

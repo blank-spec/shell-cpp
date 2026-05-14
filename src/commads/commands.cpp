@@ -1,5 +1,6 @@
 #include <print>
 #include <ranges>
+#include <direct.h>
 
 #include "commads.hpp"
 #include "utils/file_utills.hpp"
@@ -133,3 +134,13 @@ void RunCommand::RunPosix(const std::string& path, const std::vector<std::string
     }
 }
 #endif
+
+
+void PwdCommand::Execute(const std::vector<std::string> &args) {
+    constexpr size_t size = 1024;
+    char buffer[size];
+
+    if (_getcwd(buffer, size) != nullptr) {
+        std::println("{}", buffer);
+    }
+}
