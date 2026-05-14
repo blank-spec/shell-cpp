@@ -21,7 +21,7 @@ void RunCommand::Execute(const std::vector<std::string> &args) {
     const auto clean_command = utils::Unquote(args[0]);
     auto path = utils::GetCommandPath(clean_command);
     if (!path) {
-        std::println("{}: not found", args[0]);
+        std::println(stderr, "{}: not found", args[0]);
         return;
     }
 

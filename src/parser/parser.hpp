@@ -14,6 +14,7 @@ using Redirections = std::vector<Redirection>;
 enum class RedirectType {
     STDOUT_REWRITE,
     STDOUT_APPEND,
+    STDERR,
 };
 
 

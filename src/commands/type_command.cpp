@@ -25,7 +25,7 @@ void TypeCommand::Execute(const std::vector<std::string> &args) {
         std::println("{} is {}", command_to_find, path.value());
     }
     else {
-        std::println("{}: not found", command_to_find);
+        std::println(stderr, "{}: not found", command_to_find);
     }
 }
 

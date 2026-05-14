@@ -40,7 +40,11 @@ bool Redirector::Apply(const Redirections& redirects) {
                     return false;
                 }
                 break;
-
+            case RedirectType::STDERR:
+                if (!SetupStderr(redir.filename)) {
+                    return false;
+                }
+                break;
             default:
                 return false;
         }
@@ -73,6 +77,32 @@ bool Redirector::SetupStdout(const std::string& path, bool append) {
     }
 
     CLOSE(fd);
+    return true;
+}
+
+
+bool Redirector::SetupStderr(const std::string& path) {
+#ifdef _WIN32
+    int fd = OPEN(path.c_str(), _O_WRONLY | _O_CREAT | _O_TRUNC, _S_IWRITE);
+#else
+    int fd = OPEN(path.c_str(), O_WRONLY | O_CREAT | O_TRUNC, 0644);
+#endif
+
+    if (fd == -1) {
+        return false;
+    }
+
+    if (DUP2(fd, 2) == -1) {
+        CLOSE(fd);
+        return false;
+    }
+
+    CLOSE(fd);
+
+    if (!std::freopen(path.c_str(), "w", stderr)) {
+        return false;
+    }
+
     return true;
 }
 

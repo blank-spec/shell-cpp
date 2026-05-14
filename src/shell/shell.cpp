@@ -31,7 +31,7 @@ void Shell::Run() {
 
         auto parse_result = ShellParser::Parse(line);
         if (!parse_result.has_value()) {
-            std::println("{}", ErrorToString(parse_result.error()));
+            std::println(stderr, "{}", ErrorToString(parse_result.error()));
             continue;
         }
 

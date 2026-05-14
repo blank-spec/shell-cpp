@@ -9,6 +9,7 @@ public:
 
 private:
     static bool SetupStdout(const std::string& path, bool append);
+    static bool SetupStderr(const std::string& path);
 };
 
 
