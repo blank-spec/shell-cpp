@@ -141,8 +141,11 @@ void PwdCommand::Execute(const std::vector<std::string> &args) {
 
 
 void CdCommand::Execute(const std::vector<std::string> &args) {
+    if (args.size() < 1) {
+        return;
+    }
+
     std::string path = args[0];
-    std::println("{}", path);
     if (path == "~") {
         const char* home = std::getenv("HOME");
         if (home) {
