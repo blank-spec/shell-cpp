@@ -42,13 +42,15 @@ bool Redirector::Apply(const Redirections& redirects) {
 }
 
 
+#include <fcntl.h> // Убедитесь, что этот заголовок подключен
+
 bool Redirector::SetupStdout(const std::string& path, bool append) {
-    int flags = _O_WRONLY | _O_CREAT;
+    int flags = O_WRONLY | O_CREAT;
 
     if (append) {
-        flags |= _O_APPEND;
+        flags |= O_APPEND;
     } else {
-        flags |= _O_TRUNC;
+        flags |= O_TRUNC;
     }
 
 #ifdef _WIN32
