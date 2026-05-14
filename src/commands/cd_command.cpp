@@ -1,8 +1,6 @@
 #include "cd_command.hpp"
 
 #include <print>
-#include <iostream>
-
 
 void CdCommand::Execute(const std::vector<std::string> &args) {
     if (args.size() < 1) {
@@ -10,16 +8,19 @@ void CdCommand::Execute(const std::vector<std::string> &args) {
     }
 
     std::string path = args[0];
-    std::cout << "DEBUG: changing dir to " << path << std::endl;
     if (path == "~") {
-        const char* home;
+        const char* home = nullptr;
 #ifdef _WIN32
-        home = getenv("USERPROFILE");
+        home = std::getenv("USERPROFILE");
 #else
-        home = getenv("HOME");
+        home = std::getenv("HOME");
 #endif
+
         if (home) {
             path = home;
+        }
+        else {
+            return;
         }
     }
 
