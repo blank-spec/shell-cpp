@@ -20,13 +20,21 @@ Shell::Shell() {
 std::vector<std::string> Shell::ParseInput(std::string_view line) const {
     std::vector<std::string> result;
     std::string current_arg;
+    char quotes_char = '\0';
     bool in_quotes = false;
 
     for (size_t i = 0; i < line.length(); ++i) {
         char c = line[i];
 
-        if (c == '\'') {
-            in_quotes = !in_quotes;
+        if ((c == '\'' || c == '"') && (!in_quotes || c == quotes_char)) {
+            if (!in_quotes) {
+                in_quotes = true;
+                quotes_char = c;
+            }
+            else {
+                in_quotes = false;
+                quotes_char = '\0';
+            }
             continue;
         }
 
