@@ -6,5 +6,4 @@
 #include "exit_command.hpp"
 #include "pwd_command.hpp"
 #include "type_command.hpp"
-#include "cat_command.hpp"
 #include "clear_command.hpp"
