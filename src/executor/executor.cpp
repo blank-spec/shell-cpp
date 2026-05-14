@@ -88,23 +88,17 @@ bool Redirector::SetupStdout(const std::string& path, bool append) {
 
 
 bool Redirector::SetupStderr(const std::string& path, bool append) {
-    int flags = O_WRONLY | O_CREAT;
-    flags |= (append ? O_APPEND : O_TRUNC);
-    int fd = OPEN(path.c_str(), flags, 0644);
-    if (fd == -1) return false;
+    const char* mode = append ? "ab" : "wb";
 
-    if (DUP2(fd, 2) == -1) {
-        CLOSE(fd);
+    if (std::freopen(path.c_str(), mode, stderr) == nullptr) {
         return false;
     }
 
-#ifndef _WIN32
-    if (std::freopen(nullptr, append ? "a" : "w", stderr) == nullptr) {
-        std::freopen(path.c_str(), append ? "a" : "w", stderr);
+    int fd = fileno(stderr);
+    if (fd != 2) {
+        DUP2(fd, 2);
     }
-#endif
 
-    CLOSE(fd);
     return true;
 }
 
@@ -116,7 +110,7 @@ void CommandExecutor::Execute(const std::vector<Redirection> &redirects,
     std::fflush(stderr);
     std::cout.flush();
     std::cerr.flush();
-    
+
 #if !defined(_WIN32) && !defined(_WIN64)
     pid_t pid = fork();
     if (pid == -1) {

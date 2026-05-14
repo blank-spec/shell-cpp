@@ -76,6 +76,8 @@ void RunCommand::RunPosix(const std::string& path, const std::vector<std::string
     }
     c_args.push_back(nullptr);
 
+    fflush(stderr);
+    fflush(stdout);
     execv(path.c_str(), c_args.data());
 
     perror("execv");
