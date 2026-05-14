@@ -69,7 +69,7 @@ void RunCommand::RunWindows(const std::string &full_path, const std::vector<std:
 #else
 void RunCommand::RunPosix(const std::string& path, const std::vector<std::string>& args) const {
     std::vector<char*> c_args;
-    c_args.push_back(const_cast<char*>(path.c_str()));
+    c_args.push_back(const_cast<char*>(args[0].c_str()));
 
     for (size_t i = 1; i < args.size(); ++i) {
         c_args.push_back(const_cast<char*>(args[i].c_str()));
