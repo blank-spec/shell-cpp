@@ -1,4 +1,5 @@
 #include "shell.hpp"
+#include "commands/commands.hpp"
 
 #include <iostream>
 #include <print>
@@ -10,6 +11,8 @@ Shell::Shell() {
     m_commands["type"] = std::make_unique<TypeCommand>(m_commands);
     m_commands["pwd"] = std::make_unique<PwdCommand>();
     m_commands["cd"] = std::make_unique<CdCommand>();
+    m_commands["cat"] = std::make_unique<CatCommand>();
+    m_commands["clear"] = std::make_unique<ClearCommand>();
 
     m_external_handler = std::make_unique<RunCommand>();
 }
@@ -17,23 +20,30 @@ Shell::Shell() {
 
 std::vector<std::string> Shell::ParseInput(std::string_view line) const {
     std::vector<std::string> result;
-    size_t start = 0;
-    size_t pos = 0;
+    std::string current_arg;
+    bool in_quotes = false;
 
-    while (pos < line.length()) {
-        while (pos < line.length() && std::isspace(static_cast<unsigned char>(line[pos]))) {
-            pos++;
+    for (size_t i = 0; i < line.length(); ++i) {
+        char c = line[i];
+
+        if (c == '\'') {
+            in_quotes = !in_quotes;
+            continue;
         }
 
-        start = pos;
-
-        while (pos < line.length() && !std::isspace(static_cast<unsigned char>(line[pos]))) {
-            pos++;
+        if (std::isspace(static_cast<unsigned char>(c)) && !in_quotes) {
+            if (!current_arg.empty()) {
+                result.push_back(current_arg);
+                current_arg.clear();
+            }
         }
-
-        if (start < pos) {
-            result.emplace_back(line.substr(start, pos - start));
+        else {
+            current_arg += c;
         }
+    }
+
+    if (!current_arg.empty()) {
+        result.push_back(current_arg);
     }
 
     return result;

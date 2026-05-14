@@ -1,56 +1,17 @@
-#include <print>
-#include <ranges>
-
-#include "commads.hpp"
-#include "utils/file_utills.hpp"
-#include "utils/string_utils.hpp"
-
 #ifdef _WIN32
-    #include <windows.h>
-    #include <process.h>
+#include <windows.h>
+#include <process.h>
 #else
-    #include <unistd.h>
-    #include <sys/wait.h>
+#include <unistd.h>
+#include <sys/wait.h>
 #endif
 
 
-void ExitCommand::Execute(const std::vector<std::string> &args) {
-    exit(0);
-}
+#include "run_command.hpp"
+#include "utils/file_utills.hpp"
+#include "utils/string_utils.hpp"
 
-
-void EchoCommand::Execute(const std::vector<std::string> &args) {
-    for (const auto& arg : args) {
-        std::print("{} ", arg);
-    }
-
-    std::println();
-}
-
-
-TypeCommand::TypeCommand(const std::unordered_map<std::string, std::unique_ptr<ICommand> > &commands)
-    : m_commands(commands),
-      m_run_command(std::make_unique<RunCommand>())
-{}
-
-
-void TypeCommand::Execute(const std::vector<std::string> &args) {
-    namespace fs = std::filesystem;
-
-    const std::string& command_to_find = args[0];
-    if (m_commands.contains(command_to_find)) {
-        std::println("{} is a shell builtin", command_to_find);
-        return;
-    }
-
-    if (const auto path = utils::GetCommandPath(command_to_find); path.has_value()) {
-        std::println("{} is {}", command_to_find, path.value());
-    }
-    else {
-        std::println("{}: not found", command_to_find);
-    }
-}
-
+#include <print>
 
 void RunCommand::Execute(const std::vector<std::string> &args) {
     if (args.empty()) {
@@ -133,30 +94,3 @@ void RunCommand::RunPosix(const std::string& path, const std::vector<std::string
     }
 }
 #endif
-
-
-void PwdCommand::Execute(const std::vector<std::string> &args) {
-    std::println("{}", std::filesystem::current_path().string());
-}
-
-
-void CdCommand::Execute(const std::vector<std::string> &args) {
-    if (args.size() < 1) {
-        return;
-    }
-
-    std::string path = args[0];
-    if (path == "~") {
-        const char* home = std::getenv("HOME");
-        if (home) {
-            path = home;
-        }
-    }
-
-    std::error_code ec;
-    std::filesystem::current_path(path, ec);
-
-    if (ec) {
-        std::println("cd: {}: No such file or directory", path);
-    }
-}

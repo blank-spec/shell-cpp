@@ -1,0 +1,7 @@
+#include "pwd_command.hpp"
+
+#include <print>
+
+void PwdCommand::Execute(const std::vector<std::string> &args) {
+    std::println("{}", std::filesystem::current_path().string());
+}
