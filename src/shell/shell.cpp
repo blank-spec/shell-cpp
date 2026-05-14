@@ -20,7 +20,6 @@ Shell::Shell() {
 }
 
 
-
 void Shell::Run() {
     while (true) {
         std::print("$ ");

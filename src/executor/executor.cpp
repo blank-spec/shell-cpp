@@ -35,6 +35,12 @@ bool Redirector::Apply(const Redirections& redirects) {
                     return false;
                 }
                 break;
+            case RedirectType::STDOUT_APPEND:
+                if (!SetupStdout(redir.filename, true)) {
+                    return false;
+                }
+                break;
+
             default:
                 return false;
         }
