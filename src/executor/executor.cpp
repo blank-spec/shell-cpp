@@ -90,21 +90,19 @@ bool Redirector::SetupStdout(const std::string& path, bool append) {
 bool Redirector::SetupStderr(const std::string& path, bool append) {
     int flags = O_WRONLY | O_CREAT;
     flags |= (append ? O_APPEND : O_TRUNC);
-
-#ifdef _WIN32
-    int fd = OPEN(path.c_str(), flags, _S_IWRITE);
-#else
     int fd = OPEN(path.c_str(), flags, 0644);
-#endif
-
-    if (fd == -1) {
-        return false;
-    }
+    if (fd == -1) return false;
 
     if (DUP2(fd, 2) == -1) {
         CLOSE(fd);
         return false;
     }
+
+#ifndef _WIN32
+    if (std::freopen(nullptr, append ? "a" : "w", stderr) == nullptr) {
+        std::freopen(path.c_str(), append ? "a" : "w", stderr);
+    }
+#endif
 
     CLOSE(fd);
     return true;
@@ -114,6 +112,11 @@ bool Redirector::SetupStderr(const std::string& path, bool append) {
 void CommandExecutor::Execute(const std::vector<Redirection> &redirects,
                               const std::function<void(const Tokens &)> &command,
                               const Tokens& args) {
+    std::fflush(stdout);
+    std::fflush(stderr);
+    std::cout.flush();
+    std::cerr.flush();
+    
 #if !defined(_WIN32) && !defined(_WIN64)
     pid_t pid = fork();
     if (pid == -1) {
