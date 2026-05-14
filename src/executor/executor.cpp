@@ -12,6 +12,7 @@
     #define DUP2 _dup2
     #define OPEN _open
     #define STDOUT_FD 1
+    #define STDERR_FD 2
     #define READ_MODE _S_IREAD
     #define WRITE_MODE _S_IWRITE
     #define DUP _dup
@@ -88,11 +89,7 @@ bool Redirector::SetupStdout(const std::string& path, bool append) {
 
 bool Redirector::SetupStderr(const std::string& path, bool append) {
     int flags = O_WRONLY | O_CREAT;
-    if (append) {
-        flags |= O_APPEND;
-    } else {
-        flags |= O_TRUNC;
-    }
+    flags |= (append ? O_APPEND : O_TRUNC);
 
 #ifdef _WIN32
     int fd = OPEN(path.c_str(), flags, _S_IWRITE);
@@ -110,12 +107,6 @@ bool Redirector::SetupStderr(const std::string& path, bool append) {
     }
 
     CLOSE(fd);
-
-    const char* mode = append ? "a" : "w";
-    if (!std::freopen(path.c_str(), mode, stderr)) {
-        return false;
-    }
-
     return true;
 }
 
@@ -141,16 +132,21 @@ void CommandExecutor::Execute(const std::vector<Redirection> &redirects,
     }
 #else
     int saved_stdout = DUP(STDOUT_FD);
+    int saved_stderr = DUP(STDERR_FD);
 
     if (Redirector::Apply(redirects)) {
         command(args);
-
         std::cout.flush();
+        std::cerr.flush();
     }
 
     if (saved_stdout != -1) {
         DUP2(saved_stdout, STDOUT_FD);
         CLOSE(saved_stdout);
+    }
+    if (saved_stderr != -1) {
+        DUP2(saved_stderr, STDERR_FD);
+        CLOSE(saved_stderr);
     }
 #endif
 }

@@ -68,30 +68,18 @@ void RunCommand::RunWindows(const std::string &full_path, const std::vector<std:
 
 #else
 void RunCommand::RunPosix(const std::string& path, const std::vector<std::string>& args) const {
-    pid_t pid = fork();
+    std::vector<char*> c_args;
+    c_args.push_back(const_cast<char*>(path.c_str()));
 
-    if (pid == -1) {
-        perror("fork");
+    for (size_t i = 1; i < args.size(); ++i) {
+        c_args.push_back(const_cast<char*>(args[i].c_str()));
     }
-    else if (pid == 0) {
-        std::vector<char*> c_args;
+    c_args.push_back(nullptr);
 
-        c_args.push_back(const_cast<char*>(args[0].c_str()));
+    execv(path.c_str(), c_args.data());
 
-        for (size_t i = 1; i < args.size(); ++i) {
-            c_args.push_back(const_cast<char*>(args[i].c_str()));
-        }
-        c_args.push_back(nullptr);
-
-        execv(path.c_str(), c_args.data());
-
-        perror("execv");
-        exit(1);
-    }
-    else {
-        int status;
-        waitpid(pid, &status, 0);
-    }
+    perror("execv");
+    exit(1);
 }
 #endif
 
