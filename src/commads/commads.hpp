@@ -53,3 +53,9 @@ class PwdCommand : public ICommand {
 public:
     void Execute(const std::vector<std::string> &args) override;
 };
+
+
+class CdCommand : public ICommand {
+public:
+    void Execute(const std::vector<std::string> &args) override;
+};

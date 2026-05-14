@@ -9,6 +9,7 @@ Shell::Shell() {
     m_commands["echo"] = std::make_unique<EchoCommand>();
     m_commands["type"] = std::make_unique<TypeCommand>(m_commands);
     m_commands["pwd"] = std::make_unique<PwdCommand>();
+    m_commands["cd"] = std::make_unique<CdCommand>();
 
     m_external_handler = std::make_unique<RunCommand>();
 }

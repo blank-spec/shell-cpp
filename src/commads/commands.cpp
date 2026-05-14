@@ -57,7 +57,7 @@ void RunCommand::Execute(const std::vector<std::string> &args) {
         return;
     }
 
-    auto clean_command = utils::Unquote(args[0]);
+    const auto clean_command = utils::Unquote(args[0]);
     auto path = utils::GetCommandPath(clean_command);
     if (!path) {
         std::println("{}: not found", args[0]);
@@ -137,4 +137,23 @@ void RunCommand::RunPosix(const std::string& path, const std::vector<std::string
 
 void PwdCommand::Execute(const std::vector<std::string> &args) {
     std::println("{}", std::filesystem::current_path().string());
+}
+
+
+void CdCommand::Execute(const std::vector<std::string> &args) {
+    std::string path = args[0];
+    std::println("{}", path);
+    if (path == "~") {
+        const char* home = std::getenv("HOME");
+        if (home) {
+            path = home;
+        }
+    }
+
+    std::error_code ec;
+    std::filesystem::current_path(path, ec);
+
+    if (ec) {
+        std::println("cd: {}: No such file or directory", path);
+    }
 }
