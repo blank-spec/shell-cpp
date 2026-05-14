@@ -11,7 +11,6 @@ Shell::Shell() {
     m_commands["type"] = std::make_unique<TypeCommand>(m_commands);
     m_commands["pwd"] = std::make_unique<PwdCommand>();
     m_commands["cd"] = std::make_unique<CdCommand>();
-    m_commands["cat"] = std::make_unique<CatCommand>();
     m_commands["clear"] = std::make_unique<ClearCommand>();
 
     m_external_handler = std::make_unique<RunCommand>();
