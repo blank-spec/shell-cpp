@@ -4,6 +4,9 @@
 #include <iostream>
 #include <print>
 
+#include "executor/executor.hpp"
+#include "parser/parser.hpp"
+
 
 Shell::Shell() {
     m_commands["exit"] = std::make_unique<ExitCommand>();
@@ -17,56 +20,6 @@ Shell::Shell() {
 }
 
 
-std::vector<std::string> Shell::ParseInput(std::string_view line) const {
-    std::vector<std::string> result;
-    std::string current_arg;
-
-    bool in_double_quotes = false;
-    bool in_single_quotes = false;
-    bool escaped = false;
-
-    for (size_t i = 0; i < line.length(); ++i) {
-        char c = line[i];
-
-        if (escaped) {
-            current_arg += c;
-            escaped = false;
-            continue;
-        }
-
-        if (c == '\\' && !in_single_quotes) {
-            escaped = true;
-            continue;
-        }
-
-        if (c == '"' && !in_single_quotes) {
-            in_double_quotes = !in_double_quotes;
-            continue;
-        }
-
-        if (c == '\'' && !in_double_quotes) {
-            in_single_quotes = !in_single_quotes;
-            continue;
-        }
-
-        if (std::isspace(static_cast<unsigned char>(c)) && !in_double_quotes && !in_single_quotes) {
-            if (!current_arg.empty()) {
-                result.push_back(current_arg);
-                current_arg.clear();
-            }
-        }
-        else {
-            current_arg += c;
-        }
-    }
-
-    if (!current_arg.empty()) {
-        result.push_back(current_arg);
-    }
-
-    return result;
-}
-
 
 void Shell::Run() {
     while (true) {
@@ -77,16 +30,26 @@ void Shell::Run() {
             continue;
         }
 
-        auto tokens = ParseInput(line);
+        auto parse_result = ShellParser::Parse(line);
+        if (!parse_result.has_value()) {
+            std::println("{}", ErrorToString(parse_result.error()));
+            continue;
+        }
+
+        auto [tokens, redirections] = parse_result.value();
         const std::string& command_token = tokens[0];
 
         std::vector<std::string> args{tokens.begin() + 1, tokens.end()};
 
         if (m_commands.contains(command_token)) {
-            m_commands[command_token]->Execute(args);
+            CommandExecutor::Execute(redirections, [this, &command_token](const Tokens& args) {
+                m_commands[command_token]->Execute(args);
+            }, args);
         }
         else {
-            m_external_handler->Execute(tokens);
+            CommandExecutor::Execute(redirections, [this](const Tokens& inner_args) {
+                m_external_handler->Execute(inner_args);
+            }, tokens);
         }
     }
 }
