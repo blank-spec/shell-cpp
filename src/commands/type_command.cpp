@@ -28,3 +28,7 @@ void TypeCommand::Execute(const std::vector<std::string> &args) {
         std::println("{}: not found", command_to_find);
     }
 }
+
+bool TypeCommand::IsStateChanging() const {
+    return false;
+}

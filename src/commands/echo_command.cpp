@@ -18,3 +18,7 @@ void EchoCommand::Execute(const std::vector<std::string> &args) {
     std::println();
 }
 
+
+bool EchoCommand::IsStateChanging() const {
+    return false;
+}

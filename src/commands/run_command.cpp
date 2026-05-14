@@ -94,3 +94,8 @@ void RunCommand::RunPosix(const std::string& path, const std::vector<std::string
     }
 }
 #endif
+
+
+bool RunCommand::IsStateChanging() const {
+    return false;
+}

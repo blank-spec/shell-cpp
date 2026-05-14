@@ -31,3 +31,8 @@ void CdCommand::Execute(const std::vector<std::string> &args) {
         std::println("cd: {}: No such file or directory", path);
     }
 }
+
+
+bool CdCommand::IsStateChanging() const {
+    return true;
+}

@@ -41,9 +41,15 @@ void Shell::Run() {
         std::vector<std::string> args{tokens.begin() + 1, tokens.end()};
 
         if (m_commands.contains(command_token)) {
-            CommandExecutor::Execute(redirections, [this, &command_token](const Tokens& args) {
-                m_commands[command_token]->Execute(args);
-            }, args);
+            auto cmd = m_commands[command_token].get();
+            if (cmd->IsStateChanging()) {
+                cmd->Execute(args);
+            }
+            else {
+                CommandExecutor::Execute(redirections, [cmd](const Tokens& args) {
+                   cmd->Execute(args);
+                }, args);
+            }
         }
         else {
             CommandExecutor::Execute(redirections, [this](const Tokens& inner_args) {
