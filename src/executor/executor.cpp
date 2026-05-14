@@ -17,6 +17,7 @@
     #define DUP _dup
 #else
     #include <unistd.h>
+    #include <sys/wait.h>
     #define CLOSE close
     #define DUP2 dup2
     #define OPEN open
