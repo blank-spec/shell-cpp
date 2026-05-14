@@ -1,6 +1,5 @@
 #include <print>
 #include <ranges>
-#include <direct.h>
 
 #include "commads.hpp"
 #include "utils/file_utills.hpp"
