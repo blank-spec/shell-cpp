@@ -81,7 +81,7 @@ void RunCommand::RunWindows(const std::string &full_path, const std::vector<std:
             &si,
             &pi))
     {
-        std::println("CreateProcess failed: {}", GetLastError());
+        std::println(stderr, "CreateProcess failed: {}", GetLastError());
         return;
     }
 
