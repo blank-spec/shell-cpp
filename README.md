@@ -1,34 +1,32 @@
-[![progress-banner](https://backend.codecrafters.io/progress/shell/9fbe01de-bd96-4bec-8220-7457e50afa1f)](https://app.codecrafters.io/users/codecrafters-bot?r=2qF)
+### Сборка проекта
 
-This is a starting point for C++ solutions to the
-["Build Your Own Shell" Challenge](https://app.codecrafters.io/courses/shell/overview).
+Для сборки проекта в режиме **Release** выполните следующие команды из корневой директории:
 
-In this challenge, you'll build your own POSIX compliant shell that's capable of
-interpreting shell commands, running external programs and builtin commands like
-cd, pwd, echo and more. Along the way, you'll learn about shell command parsing,
-REPLs, builtin commands, and more.
+```bash
+# 1. Создание директории для сборки
+cmake -B build -DCMAKE_BUILD_TYPE=Release
 
-**Note**: If you're viewing this repo on GitHub, head over to
-[codecrafters.io](https://codecrafters.io) to try the challenge.
-
-# Passing the first stage
-
-The entry point for your `shell` implementation is in `src/main.cpp`. Study and
-uncomment the relevant code, then run the command below to execute the tests on
-our servers:
-
-```sh
-codecrafters submit
+# 2. Компиляция проекта
+cmake --build build --config Release
 ```
 
-Time to move on to the next stage!
+## Описание Shell
 
-# Stage 2 & beyond
+Проект представляет собой кроссплатформенную оболочку (shell), поддерживающую базовые встроенные команды и работу с системными утилитами.
 
-Note: This section is for stages 2 and beyond.
+### Основные возможности
 
-1. Ensure you have `cmake` installed locally
-1. Run `./your_program.sh` to run your program, which is implemented in
-   `src/main.cpp`.
-1. Run `codecrafters submit` to submit your solution to CodeCrafters. Test
-   output will be streamed to your terminal.
+*   **Встроенные команды:**
+   *   `echo` — вывод текста в консоль.
+   *   `type` — проверка, является ли команда встроенной или внешним файлом.
+   *   `pwd` — вывод текущей рабочей директории.
+   *   `cd` — смена директории.
+   *   `clear` — очистка экрана терминала.
+   *   `exit` — завершение работы оболочки.
+*   **Внешние команды:** Поддержка запуска любых системных утилит (например, `git`, `grep`, `ls`, `cat`), доступных в вашем окружении.
+*   **Перенаправление потоков:**
+   *   Вывод в файл (перезапись): `command > file` или `command 1> file`
+   *   Дозапись в файл: `command >> file`
+   *   Перенаправление ошибок: `command 2> file`
+   *   Дозапись ошибок: `command 2>> file`
+*   **Кроссплатформенность:** Код написан с учетом переносимости и стабильно работает на различных операционных системах.
