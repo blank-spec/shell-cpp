@@ -1,7 +1,8 @@
-#include <print>
+#include <unordered_map>
+#include <vector>
+#include <array>
 
 #include "file_utills.hpp"
-#include <vector>
 
 namespace utils {
     bool IsExecutable(const std::filesystem::path& path) {
@@ -23,44 +24,84 @@ namespace utils {
     std::optional<std::string> GetCommandPath(std::string_view command) {
         namespace fs = std::filesystem;
 
-        try {
-            fs::path cmd_path(command);
+        if (command.empty()) {
+            return std::nullopt;
+        }
 
-            if (cmd_path.is_absolute()) {
-                if (fs::exists(cmd_path)) return cmd_path.string();
-                return std::nullopt;
+        static std::unordered_map<std::string, std::string> cache;
+        static std::vector<fs::path> path_dirs;
+        static bool path_initialized = false;
+
+        if (command.front() == '/' ||
+            (command.size() >= 2 && command[1] == ':')) {
+
+            std::error_code ec;
+            const fs::path p(command);
+
+            if (p.is_absolute() &&
+                fs::exists(p, ec) && !ec &&
+                fs::is_regular_file(p, ec) && !ec &&
+                IsExecutable(p)) {
+                return p.string();
             }
+            return std::nullopt;
+        }
 
+        const std::string cmd_str(command);
+
+        if (cache.contains(cmd_str)) {
+            return cache[cmd_str];
+        }
+
+        if (!path_initialized) {
             const char* path_env = std::getenv("PATH");
-            if (path_env) {
-                std::stringstream ss{path_env};
-                std::string directory;
-
-#ifdef _WIN32
-                char delimiter = ';';
-                std::vector<std::string> extensions = {"", ".exe", ".bat", ".cmd", ".com"};
-#else
-                char delimiter = ':';
-                std::vector<std::string> extensions = {""};
-#endif
-
-                while (std::getline(ss, directory, delimiter)) {
-                    if (directory.empty()) continue;
-
-                    for (const auto& ext : extensions) {
-                        const fs::path full_path = fs::path(directory) / (std::string(command) + ext);
-
-                        if (fs::exists(full_path) && fs::is_regular_file(full_path)) {
-                            if (IsExecutable(full_path)) {
-                                return full_path.string();
-                            }
-                        }
+            if (path_env && *path_env) {
+                std::stringstream ss(path_env);
+                std::string dir;
+    #ifdef _WIN32
+                char delim = ';';
+    #else
+                char delim = ':';
+    #endif
+                while (std::getline(ss, dir, delim)) {
+                    if (!dir.empty()) {
+                        path_dirs.emplace_back(std::move(dir));
                     }
                 }
             }
+            path_initialized = true;
         }
-        catch (...) {
-            return std::nullopt;
+
+        auto check_and_cache = [&](const fs::path& path) -> bool {
+            std::error_code ec;
+            if (fs::exists(path, ec) && !ec &&
+                fs::is_regular_file(path, ec) && !ec &&
+                IsExecutable(path)) {
+
+                std::string result = path.string();
+                cache[cmd_str] = result;
+                return true;
+            }
+            return false;
+        };
+
+        for (const auto& dir : path_dirs) {
+            fs::path base = dir / cmd_str;
+
+            if (check_and_cache(base)) {
+                return cache[cmd_str];
+            }
+
+    #ifdef _WIN32
+            for (std::string_view ext : {".exe", ".bat", ".cmd", ".com"}) {
+                fs::path p = base;
+                p += ext;
+
+                if (check_and_cache(p)) {
+                    return cache[cmd_str];
+                }
+            }
+    #endif
         }
 
         return std::nullopt;
