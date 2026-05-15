@@ -5,6 +5,12 @@ Thumbs.db:encryptable
 ehthumbs.db
 ehthumbs_vista.db
 
+codecrafters.yml
+
+*.idea
+.codecrafters
+*.sh
+
 # Dump file
 *.stackdump
 
