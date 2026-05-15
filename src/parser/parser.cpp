@@ -103,7 +103,6 @@ std::expected<std::string, ParseError> ShellParser::ExtractNextWord(std::string_
             }
         }
 
-        // Обработка кавычек
         if (c == '\'' && !in_double) {
             in_single = !in_single;
             ++i;
@@ -124,11 +123,13 @@ std::expected<std::string, ParseError> ShellParser::ExtractNextWord(std::string_
             if (in_double) {
                 if (next == '"' || next == '\\' || next == '$' || next == '`' || next == '\n') {
                     word += next;
-                } else {
+                }
+                else {
                     word += '\\';
                     word += next;
                 }
-            } else {
+            }
+            else {
                 word += next;
             }
             i += 2;
