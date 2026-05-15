@@ -16,6 +16,7 @@ enum class RedirectType {
     STDOUT_APPEND,
     STDERR,
     STDERR_APPEND,
+    STDIN,
 };
 
 

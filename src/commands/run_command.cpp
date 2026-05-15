@@ -35,53 +35,59 @@ void RunCommand::Execute(const std::vector<std::string> &args) {
 
 #ifdef _WIN32
 void RunCommand::RunWindows(const std::string &full_path, const std::vector<std::string> &args) const {
-    STARTUPINFOA si;
-    PROCESS_INFORMATION pi;
-    ZeroMemory(&si, sizeof(si));
-    si.cb = sizeof(si);
-    ZeroMemory(&pi, sizeof(pi));
-
-    std::string cmdLine = "\"" + args[0] + "\"";
-
-    for (size_t i = 1; i < args.size(); ++i) {
-        cmdLine += " " + args[i];
+    if (args.empty()) {
+        return;
     }
 
-    if (!CreateProcessA(full_path.c_str(),
-        cmdLine.data(),
-        nullptr,
-        nullptr,
-        FALSE,
-        0,
-        nullptr,
-        nullptr,
-        &si,
-        &pi)) {
-        return;
+    std::string cmdLine;
+    for (size_t i = 0; i < args.size(); ++i) {
+        if (i > 0) {
+            cmdLine += " ";
         }
+
+        const std::string& arg = args[i];
+
+        bool needs_quotes = arg.find(' ') != std::string::npos ||
+                            arg.find('\t') != std::string::npos ||
+                            arg.find('"') != std::string::npos;
+
+        if (needs_quotes) {
+            cmdLine += '"';
+            for (char c : arg) {
+                if (c == '"') {
+                    cmdLine += '\\';
+                }
+                cmdLine += c;
+            }
+            cmdLine += '"';
+        }
+        else {
+            cmdLine += arg;
+        }
+    }
+
+    STARTUPINFOA si = { sizeof(si) };
+    PROCESS_INFORMATION pi;
+
+    if (!CreateProcessA(
+            full_path.c_str(),
+            cmdLine.data(),
+            nullptr,
+            nullptr,
+            FALSE,
+            0,
+            nullptr,
+            nullptr,
+            &si,
+            &pi))
+    {
+        std::println("CreateProcess failed: {}", GetLastError());
+        return;
+    }
 
     WaitForSingleObject(pi.hProcess, INFINITE);
     CloseHandle(pi.hProcess);
     CloseHandle(pi.hThread);
-}
-
-
-#else
-void RunCommand::RunPosix(const std::string& path, const std::vector<std::string>& args) const {
-    std::vector<char*> c_args;
-    c_args.push_back(const_cast<char*>(args[0].c_str()));
-
-    for (size_t i = 1; i < args.size(); ++i) {
-        c_args.push_back(const_cast<char*>(args[i].c_str()));
-    }
-    c_args.push_back(nullptr);
-
-    fflush(stderr);
-    fflush(stdout);
-    execv(path.c_str(), c_args.data());
-
-    perror("execv");
-    exit(1);
 }
 #endif
 
