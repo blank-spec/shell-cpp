@@ -1,3 +1,7 @@
+#include "run_command.hpp"
+#include "utils/file_utills.hpp"
+#include "utils/string_utils.hpp"
+
 #ifdef _WIN32
 #include <windows.h>
 #include <process.h>
@@ -5,11 +9,6 @@
 #include <unistd.h>
 #include <sys/wait.h>
 #endif
-
-
-#include "run_command.hpp"
-#include "utils/file_utills.hpp"
-#include "utils/string_utils.hpp"
 
 #include <print>
 

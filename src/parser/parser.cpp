@@ -1,4 +1,5 @@
 #include "parser.hpp"
+
 #include <optional>
 #include <unordered_map>
 #include <cctype>

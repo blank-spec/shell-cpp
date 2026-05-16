@@ -1,14 +1,14 @@
 #include "echo_command.hpp"
+#include "command_repository/command_repository.hpp"
 
+#include <ostream>
 #include <print>
-
 #include <vector>
 #include <string>
-#include <ranges>
 
 
 void EchoCommand::Execute(const std::vector<std::string> &args) {
-    for (size_t i = 0; i < args.size(); ++i) {
+    for (size_t i = 1; i < args.size(); ++i) {
         std::print("{}", args[i]);
 
         if (i < args.size() - 1) {

@@ -11,9 +11,6 @@
 class Shell {
 public:
     Shell();
-    void Run();
 
-private:
-    std::unordered_map<std::string, std::unique_ptr<ICommand>> m_commands;
-    std::unique_ptr<ICommand> m_external_handler;
+    void Run();
 };

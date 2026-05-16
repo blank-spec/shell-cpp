@@ -1,9 +1,8 @@
+#include "utils/file_utills.hpp"
+
 #include <gtest/gtest.h>
 #include <filesystem>
 #include <fstream>
-#include <cstdlib>
-
-#include "utils/file_utills.hpp"
 
 #ifdef _WIN32
 #include <process.h>

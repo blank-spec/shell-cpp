@@ -1,7 +1,10 @@
 #pragma once
+
 #include <functional>
 
+#include "commands/base_command.hpp"
 #include "parser/parser.hpp"
+
 
 class Redirector {
 public:
@@ -13,9 +16,19 @@ private:
 };
 
 
+struct Args {
+    Tokens       tokens;
+    Redirections redirections;
+};
+
+
 class CommandExecutor {
 public:
-    static void Execute(const std::vector<Redirection>& redirects,
-                        const std::function<void(const Tokens&)>& command,
-                        const Tokens& args);
+    static void Process(const Args& args);
+
+private:
+    static void Execute(const Args& args, const std::function<void(const Tokens&)>& command);
+    static void HandleBuiltin(std::unique_ptr<ICommand> cmd, const Args& args);
+    static void HandleExternal(const Args& args);
 };
+

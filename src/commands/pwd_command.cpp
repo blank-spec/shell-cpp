@@ -1,4 +1,5 @@
 #include "pwd_command.hpp"
+#include "command_repository/command_repository.hpp"
 
 #include <print>
 

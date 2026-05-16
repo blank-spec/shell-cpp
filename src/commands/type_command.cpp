@@ -1,22 +1,16 @@
 #include "type_command.hpp"
 #include "utils/file_utills.hpp"
+#include "run_command.hpp"
+#include "command_repository/command_repository.hpp"
 
 #include <print>
-
-#include "run_command.hpp"
-
-
-TypeCommand::TypeCommand(const std::unordered_map<std::string, std::unique_ptr<ICommand> > &commands)
-: m_commands(commands),
-  m_run_command(std::make_unique<RunCommand>())
-{}
 
 
 void TypeCommand::Execute(const std::vector<std::string> &args) {
     namespace fs = std::filesystem;
 
-    const std::string& command_to_find = args[0];
-    if (m_commands.contains(command_to_find)) {
+    const std::string& command_to_find = args[1];
+    if (CommandRepository::instance().IsBuiltin(command_to_find)) {
         std::println("{} is a shell builtin", command_to_find);
         return;
     }
@@ -28,6 +22,7 @@ void TypeCommand::Execute(const std::vector<std::string> &args) {
         std::println(stderr, "{}: not found", command_to_find);
     }
 }
+
 
 bool TypeCommand::IsStateChanging() const {
     return false;

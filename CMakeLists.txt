@@ -19,6 +19,7 @@ list(FILTER SRC_FILES EXCLUDE REGEX "main\\.cpp|tests/|test_")
 
 add_library(shell_lib STATIC ${SRC_FILES})
 target_include_directories(shell_lib PUBLIC "${CMAKE_SOURCE_DIR}/src")
+target_link_options(shell_lib PRIVATE "/WHOLEARCHIVE:shell_lib")
 
 add_executable(shell src/main.cpp)
 target_link_libraries(shell PRIVATE shell_lib)

@@ -1,9 +1,12 @@
 #include "executor.hpp"
+#include "commands/run_command.hpp"
+#include "commands/command_repository/command_repository.hpp"
 
 #include <iostream>
 #include <vector>
 #include <string>
 #include <fcntl.h>
+#include <ranges>
 #include <sys/stat.h>
 
 #if defined(_WIN32) || defined(_WIN64)
@@ -103,9 +106,7 @@ bool Redirector::SetupStderr(const std::string& path, bool append) {
 }
 
 
-void CommandExecutor::Execute(const std::vector<Redirection> &redirects,
-                              const std::function<void(const Tokens &)> &command,
-                              const Tokens& args) {
+void CommandExecutor::Execute(const Args& args, const std::function<void(const Tokens&)>& command) {
     std::fflush(stdout);
     std::fflush(stderr);
     std::cout.flush();
@@ -131,8 +132,8 @@ void CommandExecutor::Execute(const std::vector<Redirection> &redirects,
     int saved_stdout = DUP(STDOUT_FD);
     int saved_stderr = DUP(STDERR_FD);
 
-    if (Redirector::Apply(redirects)) {
-        command(args);
+    if (Redirector::Apply(args.redirections)) {
+        command(args.tokens);
         std::cout.flush();
         std::cerr.flush();
     }
@@ -146,4 +147,41 @@ void CommandExecutor::Execute(const std::vector<Redirection> &redirects,
         CLOSE(saved_stderr);
     }
 #endif
+}
+
+
+void CommandExecutor::Process(const Args &args) {
+    if (args.tokens.empty()) {
+        return;
+    }
+
+    const auto& command_name = args.tokens[0];
+    auto builtin_opt = CommandRepository::instance().Create(command_name);
+
+    if (builtin_opt) {
+        HandleBuiltin(std::move(*builtin_opt), args);
+    }
+    else {
+        HandleExternal(args);
+    }
+}
+
+
+void CommandExecutor::HandleBuiltin(std::unique_ptr<ICommand> cmd, const Args &args) {
+    if (cmd->IsStateChanging()) {
+        cmd->Execute(args.tokens);
+    }
+    else {
+        Execute(args, [&](const Tokens& inner_args) {
+            cmd->Execute(inner_args);
+        });
+    }
+}
+
+
+void CommandExecutor::HandleExternal(const Args &args) {
+    static RunCommand external_handler;
+    Execute(args,[&](const Tokens& inner_args) {
+        external_handler.Execute(inner_args);
+    });
 }

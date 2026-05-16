@@ -1,8 +1,7 @@
+#include "file_utills.hpp"
+
 #include <unordered_map>
 #include <vector>
-#include <array>
-
-#include "file_utills.hpp"
 
 namespace utils {
     bool IsExecutable(const std::filesystem::path& path) {
