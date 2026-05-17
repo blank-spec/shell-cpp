@@ -52,20 +52,12 @@ void Shell::Run() {
     );
 
     std::string line;
+    std::string originalPrefix;
 
     auto redraw_line = [&]() {
         std::print("\r\033[K$ {}", line);
         std::cout.flush();
     };
-
-    auto print_completions_list =
-        [&](const std::vector<std::string>& completions) {
-            std::print("\n");
-            for (const auto& word : completions) {
-                std::print("{} ", word);
-            }
-            std::print("\n");
-        };
 
     auto reset_mode = [&](InputMode& mode) {
         mode = InputMode::Normal;
@@ -81,45 +73,47 @@ void Shell::Run() {
 
         switch (ch) {
             case '\t': {
-                auto generator = trie.GetNextCompletion(line);
-                std::vector<std::string> completions;
-                for (auto&& word : generator) {
-                    completions.push_back(std::move(word));
-                }
+                if (mode == InputMode::Normal) {
+                    originalPrefix = line;
+                    auto gen = trie.GetNextCompletion(originalPrefix);
 
-            switch (mode) {
-                case InputMode::Normal: {
-                    if (completions.empty()) {
+                    auto it = gen.begin();
+                    if (it == gen.end()) {
+                        std::cout << '\x07' << std::flush;
                         break;
                     }
 
-                    if (completions.size() == 1) {
-                        if (line != completions.front()) {
-                            line = completions.front();
+                    std::string first = *it;
+                    ++it;
+
+                    if (it == gen.end()) {
+                        if (line != first) {
+                            line = std::move(first);
                             redraw_line();
                         }
-                        break;
                     }
-
-                    if (line != completions.front()) {
-                        line = completions.front();
-                        redraw_line();
+                    else {
+                        if (line != first) {
+                            line = std::move(first);
+                            redraw_line();
+                        }
+                        mode = InputMode::Completion;
                     }
-                    mode = InputMode::Completion;
-                    break;
                 }
+                else {
+                    auto gen = trie.GetNextCompletion(originalPrefix);
 
-                case InputMode::Completion: {
-                    print_completions_list(completions);
-                    line.clear();
-                    std::print("$ ");
-                    std::cout.flush();
+                    std::print("\n");
+                    for (auto&& word : gen) {
+                        std::print("{} ", word);
+                    }
+                    std::print("\n");
+
+                    redraw_line();
                     mode = InputMode::Normal;
-                    break;
                 }
+                break;
             }
-            break;
-        }
 
             case '\r':
             case '\n': {
