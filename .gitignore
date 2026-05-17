@@ -7,7 +7,7 @@ ehthumbs_vista.db
 
 
 *.idea
-*.sh
+.sh
 
 # Dump file
 *.stackdump
