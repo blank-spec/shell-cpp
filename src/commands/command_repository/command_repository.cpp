@@ -25,6 +25,11 @@ CommandRepository::Create(std::string_view name) const {
 }
 
 
+std::vector<std::string> CommandRepository::GetCommands() const {
+    return m_commands | std::ranges::views::keys | std::ranges::to<std::vector<std::string>>();
+}
+
+
 bool CommandRepository::IsBuiltin(std::string_view name) const {
     return m_commands.contains(name);
 }

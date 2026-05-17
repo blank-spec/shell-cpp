@@ -21,6 +21,8 @@ public:
     std::optional<std::unique_ptr<ICommand>>
     Create(std::string_view name) const;
 
+    std::vector<std::string> GetCommands() const;
+
 private:
     struct StringHash {
         using is_transparent = void;
